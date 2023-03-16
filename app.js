@@ -29,18 +29,23 @@ const fetchData = async (query, token) => {
     body: JSON.stringify({query: query})
   }
 
-  const r = await fetch(url, options)
-  return await r.json()
+  let r
+  try {
+    r = await fetch(url, options)
+  } catch {
+    displayError('Ошибка сети')
+  }
+  return r && r.json()
 }
 
 const searchHandler = async function (e, token) {
-  const list = document.getElementById('suggestions-select')
+  const list = document.getElementById('suggestions-list')
   const organizationField = document.getElementById('organization-field')
   hideError()
   const response = await fetchData(e.target.value, token)
   if (response?.suggestions?.length) {
     displayListOptions(list, organizationField, response)
-  } else {
+  } else if (response) {
     displayError(response.message)
     hideListOptions(list)
   }
@@ -66,6 +71,14 @@ class findOrganizationWidget extends HTMLElement {
     )
     
     createErrorField()
+
+    const siteWidth = parseFloat(FIELD_WIDTH) * 1.25;
+    const scale = screen.width /siteWidth;
+    const meta = document.createElement('meta')
+    meta.name = 'viewport'
+    meta.content = `width=1280, initial-scale=1`
+    document.head.prepend(meta)
+    document.querySelector('meta[name="viewport"]').setAttribute('content', 'width='+siteWidth+', initial-scale='+scale+'');
   }
 }
 customElements.define("find-organization-widget", findOrganizationWidget)
@@ -89,8 +102,13 @@ const createTextField = ({name, id, searchHandler}) => {
 }
 
 const createListElement = () => {
-  const list = document.createElement('select')
-  list.id = 'suggestions-select'
+  const list = document.createElement('ul')
+  list.id = 'suggestions-list'
+  list.style.listStyle = 'none'
+  list.style.backgroundColor = '#EEEEEE'
+  list.style.paddingLeft = '0px'
+  list.style.borderRadius = '1px'
+  list.style.cursor = 'pointer'
   list.style.width = FIELD_WIDTH
   list.style.marginTop = '-' + FIELD_MARGIN_BOTTOM
   list.style.position = 'absolute'
@@ -113,19 +131,21 @@ const displayListOptions = (list, organizationField, response) => {
   list.size  = response.suggestions.length
   list.style.display = ''
   list.innerHTML = ''
-  let options = []
+  let listItems = []
   response.suggestions.forEach(i => {
-    let option = document.createElement('option')
-    option.innerHTML = i.value
-    option.onclick = () => {
+    let listItem = document.createElement('li')
+    listItem.style.width = FIELD_WIDTH
+    listItem.style.margin = '8px 0px' 
+    listItem.innerHTML = i.value
+    listItem.addEventListener('click', () => {
       organizationField.value = i.value
       fillTextFields(i)
       list.style.display = 'none'
-    }
-    options.push(option)
+    })
+    listItems.push(listItem)
   })
   organizationField.after(list)
-  list.prepend(...options)
+  list.prepend(...listItems)
 }
 
 const hideListOptions = (list) => {
