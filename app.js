@@ -62,10 +62,12 @@ class findOrganizationWidget extends HTMLElement {
   connectedCallback () {
     const token = this.getAttribute('token') || null
     addStyles()
-    scalePage()
-    const widget = createWidget(token)
-    document.body.prepend(widget)
-    createErrorField(widget)
+    setTimeout(() => {
+      scalePage()
+      const widget = createWidget(token)
+      document.body.prepend(widget)
+      createErrorField(widget)
+    }, 0)
   }
 }
 customElements.define("find-organization-widget", findOrganizationWidget)
@@ -158,10 +160,6 @@ const scalePage = () => {
 }
 
 const addStyles = () => {
-  const preLoad = document.createElement('link')
-  preLoad.rel = 'preload'
-  preLoad.href = 'styles.css'
-  preLoad.as = 'style'
   const link = document.createElement('link')
   link.rel = 'stylesheet'
   link.href = 'styles.css'
