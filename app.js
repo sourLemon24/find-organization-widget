@@ -100,7 +100,7 @@ const fillTextFields = (clickedItem) => {
   const address = document.getElementById('address')
   shortName.value = clickedItem?.data?.name?.short || ''
   fullName.value = clickedItem?.data?.name?.full || ''
-  innKpp.value = clickedItem ? `${clickedItem?.data?.inn} / ${clickedItem?.data?.kpp}` : ''
+  innKpp.value = clickedItem ? `${clickedItem?.data?.inn} / ${clickedItem?.data?.kpp || 'нет данных'}` : ''
   address.value = clickedItem?.data?.address?.value || ''
 }
 
@@ -158,6 +158,10 @@ const scalePage = () => {
 }
 
 const addStyles = () => {
+  const preLoad = document.createElement('link')
+  preLoad.rel = 'preload'
+  preLoad.href = 'styles.css'
+  preLoad.as = 'style'
   const link = document.createElement('link')
   link.rel = 'stylesheet'
   link.href = 'styles.css'
