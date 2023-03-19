@@ -1,5 +1,4 @@
 const FIELD_WIDTH = '320px'
-const FIELD_MARGIN_BOTTOM = '10px'
 const DEBOUNCE_TIME = 400
 
 const debounce = (func, wait) => {
@@ -46,10 +45,12 @@ const searchHandler = async function (e, token) {
   if (response?.suggestions?.length) {
     displayListOptions(list, organizationField, response)
   } else if (response) {
-    displayError(response.message)
+    fillTextFields()
     hideListOptions(list)
+    displayError(response.message)
   }
   if (!e.target.value?.length) {
+    fillTextFields()
     hideListOptions(list)
     hideError()
   }
@@ -61,24 +62,20 @@ class findOrganizationWidget extends HTMLElement {
   connectedCallback () {
     const token = this.getAttribute('token') || null
 
-    document.body.prepend(
+    const wrapper = document.createElement('div')
+    wrapper.classList.add('widget-wrapper')
+    wrapper.prepend(
       ...createTextField({name: 'Компания или ИП', id: 'organization-field', searchHandler: (e) => debounceHandler(e, token)}),
       ...createTextField({name: 'Краткое наименование', id: 'short-name'}),
       ...createTextField({name: 'Полное наименование', id: 'full-name'}),
       ...createTextField({name: 'ИНН / КПП', id: 'inn-kpp'}),
       ...createTextField({name: 'Адрес', id: 'address'}),   
-      createListElement(),
-    )
+      createListElement())
+    document.body.prepend(wrapper)
     
-    createErrorField()
-
-    const siteWidth = parseFloat(FIELD_WIDTH) * 1.25;
-    const scale = screen.width /siteWidth;
-    const meta = document.createElement('meta')
-    meta.name = 'viewport'
-    meta.content = `width=1280, initial-scale=1`
-    document.head.prepend(meta)
-    document.querySelector('meta[name="viewport"]').setAttribute('content', 'width='+siteWidth+', initial-scale='+scale+'');
+    createErrorField(wrapper)
+    addStyles()
+    scalePage()
   }
 }
 customElements.define("find-organization-widget", findOrganizationWidget)
@@ -87,7 +84,7 @@ const createTextField = ({name, id, searchHandler}) => {
   const label = document.createElement('label')
   label.for = id
   label.innerHTML = name
-  label.style.display = 'block'
+  label.classList.add('text-field__label')
 
   const field = document.createElement('input')
   field.id = id
@@ -95,24 +92,14 @@ const createTextField = ({name, id, searchHandler}) => {
   field.placeholder = searchHandler ? 'Введите название организации' : ''
   field.readOnly = !searchHandler
   field.oninput = searchHandler
-  field.style.display = 'block'
-  field.style.marginBottom = FIELD_MARGIN_BOTTOM
-  field.style.width = FIELD_WIDTH
+  field.classList.add('text-field__input')
   return [label, field] 
 }
 
 const createListElement = () => {
   const list = document.createElement('ul')
   list.id = 'suggestions-list'
-  list.style.listStyle = 'none'
-  list.style.backgroundColor = '#EEEEEE'
-  list.style.paddingLeft = '0px'
-  list.style.borderRadius = '1px'
-  list.style.cursor = 'pointer'
-  list.style.width = FIELD_WIDTH
-  list.style.marginTop = '-' + FIELD_MARGIN_BOTTOM
-  list.style.position = 'absolute'
-  list.style.display = 'none'
+  list.classList.add('suggestions-list')
   return list
 }
 
@@ -134,13 +121,12 @@ const displayListOptions = (list, organizationField, response) => {
   let listItems = []
   response.suggestions.forEach(i => {
     let listItem = document.createElement('li')
-    listItem.style.width = FIELD_WIDTH
-    listItem.style.margin = '8px 0px' 
+    listItem.classList.add('suggestions-list-item')
     listItem.innerHTML = i.value
     listItem.addEventListener('click', () => {
       organizationField.value = i.value
       fillTextFields(i)
-      list.style.display = 'none'
+      hideListOptions(list)
     })
     listItems.push(listItem)
   })
@@ -150,16 +136,13 @@ const displayListOptions = (list, organizationField, response) => {
 
 const hideListOptions = (list) => {
   list.style.display = 'none'
-  fillTextFields()
 }
 
-const createErrorField = () => {
+const createErrorField = (wrapper) => {
   const errorField = document.createElement('span')
   errorField.id = 'error-field'
-  errorField.style.color = 'red'
-  errorField.style.display = 'none'
-  errorField.style.maxWidth = FIELD_WIDTH
-  document.body.append(errorField)
+  errorField.classList.add('error-field')
+  wrapper.append(errorField)
 }
 
 const displayError = (message) => {
@@ -172,4 +155,21 @@ const displayError = (message) => {
 const hideError = () => {
   elem = document.getElementById('error-field')
   if (elem) elem.innerHTML = ''
+}
+
+const scalePage = () => {
+  const siteWidth = parseFloat(FIELD_WIDTH) * 1.25;
+  const scale = screen.width /siteWidth
+  const meta = document.createElement('meta')
+  meta.name = 'viewport'
+  meta.content = `width=1280, initial-scale=1`
+  document.head.prepend(meta)
+  document.querySelector('meta[name="viewport"]').setAttribute('content', 'width='+siteWidth+', initial-scale='+scale+'')
+}
+
+const addStyles = () => {
+  const link = document.createElement('link')
+  link.rel = 'stylesheet'
+  link.href = 'styles.css'
+  document.head.prepend(link)
 }
