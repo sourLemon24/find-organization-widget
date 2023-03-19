@@ -38,7 +38,7 @@ body {
   font-size: 14px;
 }
 
-input[type="text"].text-field__input {
+.text-field__input input[type="text"] {
   cursor: default;
 }
 
