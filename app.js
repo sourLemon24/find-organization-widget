@@ -61,21 +61,11 @@ const debounceHandler = debounce((query, token) => searchHandler(query, token), 
 class findOrganizationWidget extends HTMLElement {
   connectedCallback () {
     const token = this.getAttribute('token') || null
-
-    const wrapper = document.createElement('div')
-    wrapper.classList.add('widget-wrapper')
-    wrapper.prepend(
-      ...createTextField({name: 'Компания или ИП', id: 'organization-field', searchHandler: (e) => debounceHandler(e, token)}),
-      ...createTextField({name: 'Краткое наименование', id: 'short-name'}),
-      ...createTextField({name: 'Полное наименование', id: 'full-name'}),
-      ...createTextField({name: 'ИНН / КПП', id: 'inn-kpp'}),
-      ...createTextField({name: 'Адрес', id: 'address'}),   
-      createListElement())
-    document.body.prepend(wrapper)
-    
-    createErrorField(wrapper)
     addStyles()
     scalePage()
+    const widget = createWidget(token)
+    document.body.prepend(widget)
+    createErrorField(widget)
   }
 }
 customElements.define("find-organization-widget", findOrganizationWidget)
@@ -138,11 +128,11 @@ const hideListOptions = (list) => {
   list.style.display = 'none'
 }
 
-const createErrorField = (wrapper) => {
+const createErrorField = (widget) => {
   const errorField = document.createElement('span')
   errorField.id = 'error-field'
   errorField.classList.add('error-field')
-  wrapper.append(errorField)
+  widget.append(errorField)
 }
 
 const displayError = (message) => {
@@ -172,4 +162,18 @@ const addStyles = () => {
   link.rel = 'stylesheet'
   link.href = 'styles.css'
   document.head.prepend(link)
+}
+
+const createWidget = (token) => {
+  const widget = document.createElement('div')
+  widget.classList.add('widget-wrapper')
+  widget.prepend(
+    ...createTextField({name: 'Компания или ИП', id: 'organization-field', searchHandler: (e) => debounceHandler(e, token)}),
+    ...createTextField({name: 'Краткое наименование', id: 'short-name'}),
+    ...createTextField({name: 'Полное наименование', id: 'full-name'}),
+    ...createTextField({name: 'ИНН / КПП', id: 'inn-kpp'}),
+    ...createTextField({name: 'Адрес', id: 'address'}),   
+    createListElement()
+  )
+  return widget
 }
