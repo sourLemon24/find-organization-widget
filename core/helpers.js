@@ -1,4 +1,4 @@
-const FIELD_WIDTH = '320px'
+export const FIELD_WIDTH = '320px'
 
 export const debounce = (func, wait) => {
   let timeout
@@ -21,11 +21,4 @@ export const scalePage = () => {
   meta.content = `width=1280, initial-scale=1`
   document.head.prepend(meta)
   document.querySelector('meta[name="viewport"]').setAttribute('content', 'width='+siteWidth+', initial-scale='+scale+'')
-}
-  
-export const addStyles = () => {
-  const link = document.createElement('link')
-  link.rel = 'stylesheet'
-  link.href = '../core/styles.css'
-  document.head.prepend(link)
 }

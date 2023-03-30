@@ -1,13 +1,11 @@
-import { createWidget, getViewElements } from "./core/view.js"
-import { setElements } from "./core/model.js"
-import { debounceHandler } from "./core/controller.js"
+import { createWidget } from "./core/view/view.js"
 
 class findOrganizationWidget extends HTMLElement {
   connectedCallback () {
     const token = this.getAttribute('token') || null
-    const widget = createWidget(debounceHandler, token)
-    document.body.prepend(widget)
-    setElements(getViewElements())
+    const widget = createWidget(token)
+    this.attachShadow({mode: 'open'});
+    this.shadowRoot.prepend(widget)
   }
 }
 customElements.define("find-organization-widget", findOrganizationWidget)
